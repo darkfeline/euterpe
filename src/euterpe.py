@@ -47,6 +47,8 @@ def main():
             source = path.rstrip('\n').lstrip('/')
             source = os.path.join(args.source, source)
             dest = os.path.join(args.dest, path)
+            if os.path.exists(dest):
+                continue
             os.makedirs(os.path.dirname(dest), exist_ok=True)
             os.link(source, dest)
             # Convert if necessary.
