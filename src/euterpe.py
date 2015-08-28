@@ -13,6 +13,9 @@ songs to MP3 (or other desired format).
 import argparse
 import os
 import subprocess
+import shutil
+import logging
+import re
 
 
 FORMATS = [
@@ -26,7 +29,16 @@ def convert(enc, src, dst):
     subprocess.call(['ffmpeg', '-i', src, '-acodec', enc, dst])
 
 
+def fat_escape(path):
+    """Escape characters for FAT file system."""
+    return re.sub(r'[*]', '_', path)
+
+
 def main():
+
+    logging.basicConfig(level='INFO')
+
+    # Set up argument parsing.
     parser = argparse.ArgumentParser()
     parser.add_argument('source')
     parser.add_argument('playlist')
@@ -36,6 +48,8 @@ def main():
         group.add_argument(flag, dest='format', action='store_const',
                            const=(ext, enc))
     args = parser.parse_args()
+
+    # Unpack desired file extension and encoder.
     if args.format is None:
         ext, enc = FORMATS[0][1:]
     else:
@@ -43,16 +57,26 @@ def main():
 
     with open(args.playlist) as playlist:
         for path in playlist:
-            # Copy the file.
-            source = path.rstrip('\n').lstrip('/')
-            source = os.path.join(args.source, source)
+            path = path.rstrip('\n').lstrip('/')
+            source = os.path.join(args.source, path)
             dest = os.path.join(args.dest, path)
-            if os.path.exists(dest):
-                continue
-            os.makedirs(os.path.dirname(dest), exist_ok=True)
-            os.link(source, dest)
-            # Convert if necessary.
-            if os.path.splitext(dest)[1].lower() != ext:
-                new_dest = os.path.splitext(dest)[0] + ext
-                convert(enc, dest, new_dest)
-                os.unlink(dest)
+            dest = fat_escape(dest)
+
+            # If the source file is already in the right format, copy it over.
+            if os.path.splitext(source)[1] == ext:
+                if not os.path.exists(dest):
+                    os.makedirs(os.path.dirname(dest), exist_ok=True)
+                    logging.info('Copying %s to %s...', source, dest)
+                    shutil.copyfile(source, dest)
+                else:
+                    logging.info('%s exists.', dest)
+            # If the source file is not in the right format, convert it.
+            else:
+                dest = os.path.splitext(dest)[0] + ext
+                if not os.path.exists(dest):
+                    os.makedirs(os.path.dirname(dest), exist_ok=True)
+                    logging.info('Converting %s to %s using %s...',
+                                 source, dest, enc)
+                    convert(enc, source, dest)
+                else:
+                    logging.info('%s exists.', dest)
