@@ -31,7 +31,7 @@ def convert(enc, src, dst):
 
 def fat_escape(path):
     """Escape characters for FAT file system."""
-    return re.sub(r'[*]', '_', path)
+    return re.sub(r'[*:;<>]', '_', path)
 
 
 def main():
