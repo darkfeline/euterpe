@@ -27,7 +27,7 @@ FORMATS = [
 def convert(enc, src, dst):
     """Convert audio file src to target format."""
     subprocess.call(['ffmpeg', '-i', src, '-acodec', enc,
-                     '-map_metadata', '0', dst])
+                     '-map_metadata:s:a', '0:s:a', dst])
 
 
 def fat_escape(path):
