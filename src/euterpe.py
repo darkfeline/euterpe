@@ -80,6 +80,3 @@ def main():
                     convert(enc, source, dest)
                 else:
                     logging.info('%s exists.', dest)
-
-    # Apply replaygain.
-    subprocess.call(['collectiongain', args.dest])
