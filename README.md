@@ -9,6 +9,7 @@ Dependencies
 
 - Python 3
 - ffmpeg for transcoding songs
+- rgain for applying replaygain
 
 Installation
 ------------
