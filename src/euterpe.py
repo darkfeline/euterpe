@@ -21,6 +21,7 @@ import re
 FORMATS = [
     ('--mp3', '.mp3', 'libmp3lame'),
     ('--vorbis', '.ogg', 'libvorbis'),
+    ('--opus', '.opus', 'libopus'),
 ]
 
 
